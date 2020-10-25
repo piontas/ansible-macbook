@@ -1,0 +1,22 @@
+---
+- hosts: local
+
+  vars_files:
+    - config.yml
+
+  pre_tasks:
+    - include_vars: "{{ item }}"
+      with_fileglob:
+        - "{{ playbook_dir }}/config.yml"
+      tags: ['always']
+    - name: Ensure Homebrew is installed
+      stat:
+        path: /usr/local/bin/brew
+      register: homebrew_check
+
+  tasks:
+    - include_tasks: tasks/homebrew.yml
+    - include_tasks: tasks/ansible-setup.yml
+    - include_tasks: tasks/packages.yml
+      tags: ['extra-packages']
+    - include_tasks: tasks/scripts.yml

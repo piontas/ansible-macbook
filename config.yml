@@ -1,0 +1,73 @@
+---
+downloads: ~/.ansible-downloads/
+
+pip_packages: []
+
+brew_packages:
+  - tfenv
+  - pyenv
+  - zsh
+  - ccat
+  - cowsay
+  - bash-completion
+  - git
+  - gh
+  - go
+  - gpg
+  - fortune
+  - helm
+  - iperf
+  - mdcat
+  - nmap
+  - openssl
+  - telnet
+  - readline
+  - sqlite3
+  - xz
+  - zlib
+  - wget
+  - jq
+  - curl
+  - awscli
+  - azure-cli
+  - kubectl
+  - kubeval
+  - kustomize
+  - docker
+  - docker-compose
+  - docker-machine
+  - hadolint
+  - hashicorp/tap/vault
+  - hashicorp/tap/packer
+  - ykman
+  - pinentry-mac
+  - yamllint
+
+brew_taps:
+  - homebrew/core
+  - homebrew/cask
+  - instrumenta/instrumenta
+
+brew_cask_appdir: /Applications
+brew_cask_packages:
+  - postman
+  - virtualbox
+  - vagrant
+  - slack
+  - keybase
+  - 1password
+  - iterm2
+  - intellij-idea-ce
+  - pycharm-ce
+  - google-chrome
+  - zoomus
+  - microsoft-teams
+  - microsoft-office
+  - azure-data-studio
+  - microsoft-azure-storage-explorer
+
+composer_packages: []
+npm_packages: []
+gem_packages: []
+
+osx_script: "~/.osx --no-restart"

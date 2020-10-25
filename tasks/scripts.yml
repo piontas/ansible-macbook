@@ -1,0 +1,37 @@
+---
+- name: Enable TouchID for Sudo
+  lineinfile:
+    path: /etc/pam.d/sudo
+    line: auth       sufficient     pam_tid.so
+    insertafter: "# sudo: "
+  become: true
+
+- name: Check if Oh My Zsh is installed
+  stat:
+    path: "~/.oh-my-zsh"
+  register: omzsh
+
+- name: Install Oh My Zsh
+  shell:
+    cmd: sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"
+  when: not omzsh.stat.exists
+
+- name: Check if SDKMan is installed
+  stat:
+    path: "~/.sdkman"
+  register: sdkman
+
+- name: Install SDKMan
+  shell:
+    cmd: curl -s "https://get.sdkman.io" | bash
+  when: not sdkman.stat.exists
+
+- name: Check if iterm2 shell integration exists
+  stat:
+    path: "~/.iterm2_shell_integration.zsh"
+  register: itermzsh
+
+- name: Install iterm2 zsh integration
+  shell:
+    cmd: curl -L https://iterm2.com/shell_integration/zsh -o ~/.iterm2_shell_integration.zsh
+  when: not itermzsh.stat.exists
