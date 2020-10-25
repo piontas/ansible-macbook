@@ -4,6 +4,7 @@ downloads: ~/.ansible-downloads/
 pip_packages: []
 
 brew_packages:
+  - dockutil
   - tfenv
   - pyenv
   - zsh
@@ -65,9 +66,46 @@ brew_cask_packages:
   - microsoft-office
   - azure-data-studio
   - microsoft-azure-storage-explorer
+  - spotify
 
 composer_packages: []
 npm_packages: []
 gem_packages: []
 
 osx_script: "~/.osx --no-restart"
+
+dockitems_remove:
+  - Mail
+  - Contacts
+  - Reminders
+  - Maps
+  - Photos
+  - Messages
+  - FaceTime
+  - iTunes
+  - iBooks
+  - App Store
+  - Calendar
+  - Music
+
+dockitems_add:
+  - name: Google Chrome
+    path: "/Applications/Google Chrome.app"
+  - name: Slack
+    path: /Applications/Slack.app
+  - name: iTerm
+    path: /Applications/iTerm.app
+  - name: Spotify
+    path: /Applications/Spotify.app
+  - name: IntelliJ IDEA CE
+    path: "/Applications/IntelliJ IDEA CE.app"
+  - name: PyCharm CE
+    path: "/Applications/PyCharm CE.app"
+  - name: Azure Data Studio
+    path: "/Applications/Azure Data Studio.app"
+  - name: Microsoft Azure Storage Explorer
+    path: "/Applications/Microsoft Azure Storage Explorer.app"
+  - name: OneDrive
+    path: /Applications/OneDrive.app
+  - name: Microsoft OneNote
+    path: "/Applications/Microsoft OneNote.app"

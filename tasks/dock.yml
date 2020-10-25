@@ -1,0 +1,10 @@
+---
+- name: Remove from Dock
+  shell:
+    cmd: dockutil --remove "{{ item }}"
+  with_items: "{{ dockitems_remove }}"
+
+- name: Add to Dock
+  shell:
+    cmd: dockutil --find "{{ item.name }}" || dockutil --add "{{ item.path }}"
+  with_items: "{{ dockitems_add }}"
