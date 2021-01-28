@@ -18,8 +18,12 @@ brew_packages:
   - fortune
   - helm
   - iperf
+  - kns
+  - ktx
   - mdcat
   - nmap
+  - nvm
+  - yarn
   - openssl
   - telnet
   - readline
@@ -43,10 +47,12 @@ brew_packages:
   - ykman
   - pinentry-mac
   - yamllint
+  - watch
 
 brew_taps:
   - homebrew/core
   - homebrew/cask
+  - blendle/blendle
   - instrumenta/instrumenta
 
 brew_cask_appdir: /Applications
@@ -59,7 +65,7 @@ brew_cask_packages:
   - 1password
   - iterm2
   - intellij-idea-ce
-  - pycharm-ce
+  - pycharm
   - google-chrome
   - zoomus
   - microsoft-teams
@@ -99,8 +105,8 @@ dockitems_add:
     path: /Applications/Spotify.app
   - name: IntelliJ IDEA CE
     path: "/Applications/IntelliJ IDEA CE.app"
-  - name: PyCharm CE
-    path: "/Applications/PyCharm CE.app"
+  - name: PyCharm
+    path: "/Applications/PyCharm.app"
   - name: Azure Data Studio
     path: "/Applications/Azure Data Studio.app"
   - name: Microsoft Azure Storage Explorer
