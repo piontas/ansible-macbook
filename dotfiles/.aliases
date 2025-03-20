@@ -1,0 +1,14 @@
+alias c="clear"
+alias cat='ccat'
+alias docker='podman'
+alias flushdns="sudo killall -HUP mDNSResponder"
+alias ktx='kubectl-ctx'
+alias kns='kubectl-ns'
+alias kgp="kubectl get pods"
+alias kgs="kubectl get services"
+alias kgn="kubectl get nodes"
+alias kga="kubectl get all"
+alias kl="kubectl logs -f"
+alias kex="kubectl exec -it"
+alias myip="curl ifconfig.me"
+alias mylocalip="ipconfig getifaddr en0"

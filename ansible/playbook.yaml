@@ -1,0 +1,80 @@
+---
+# yamllint disable rule:braces
+- name: Setup macOS
+  hosts: localhost
+  environment:
+    GPG_EMAIL: "{{ lookup('env', 'GPG_EMAIL') }}"
+    GPG_SIGNING_KEY: "{{ lookup('env', 'GPG_SIGNING_KEY') }}"
+  connection: local
+  tasks:
+    - name: Enable TouchID for Sudo
+      lineinfile:
+        path: /etc/pam.d/sudo
+        line: auth       sufficient     pam_tid.so
+        insertafter: "# sudo: "
+      become: true
+
+    - name: Ensure Homebrew is installed
+      shell: |
+        if ! command -v brew &> /dev/null; then
+          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        fi
+      args:
+        executable: /bin/bash
+
+    - name: Set Zsh as default shell
+      become: true
+      user:
+        name: "{{ lookup('env', 'USER') }}"
+        shell: /bin/zsh
+
+    - name: Install Oh My Zsh
+      shell: |
+        if [ ! -d "$HOME/.oh-my-zsh" ]; then
+          sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+        fi
+      args:
+        executable: /bin/zsh
+        creates: "{{ ansible_env.HOME }}/.oh-my-zsh"
+
+    - name: Install packages from Brewfile
+      shell: brew bundle --file={{ playbook_dir }}/../Brewfile
+      args:
+        executable: /bin/zsh
+
+    - name: Check if iterm2 shell integration exists
+      stat:
+        path: "~/.iterm2_shell_integration.zsh"
+      register: itermzsh
+
+    - name: Install iterm2 zsh integration
+      shell:
+        cmd: curl -L https://iterm2.com/shell_integration/zsh -o ~/.iterm2_shell_integration.zsh
+      when: not itermzsh.stat.exists
+
+    - name: Check if gcloud is installed
+      command: "which gcloud"
+      register: gcloud_check
+      changed_when: false
+      ignore_errors: true
+
+    - name: Install gke-gcloud-auth-plugin if gcloud is available
+      command: "gcloud components install gke-gcloud-auth-plugin --quiet"
+      when: gcloud_check.rc == 0
+
+    - name: Configure Git
+      git_config:
+        name: "{{ item.name }}"
+        scope: global
+        value: "{{ item.value }}"
+      loop:
+        - { name: 'user.name', value: 'Marek Piatek' }
+        - { name: 'user.signingkey', value: '{{ GPG_SIGNING_KEY }}' }
+        - { name: 'user.email', value: '{{ GPG_EMAIL }}' }
+        - { name: 'commit.gpgsign', value: 'true' }
+        - { name: 'gpg.program', value: '/opt/homebrew/bin/gpg' }
+
+    - name: Clean up Homebrew
+      shell: brew cleanup
+      args:
+        executable: /bin/zsh
