@@ -23,6 +23,7 @@
       args:
         executable: /bin/bash
 
+
     - name: Set Zsh as default shell
       become: true
       user:
