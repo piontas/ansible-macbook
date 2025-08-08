@@ -3,10 +3,12 @@
 on:
   push:
     paths:
-      - 'ansible/*'
+      - 'ansible/**/*.yaml'
+      - 'ansible/**/*.yml'
   pull_request:
     paths:
-      - 'ansible/*'
+      - 'ansible/**/*.yaml'
+      - 'ansible/**/*.yml'
 name: ansible
 jobs:
   ansible:
