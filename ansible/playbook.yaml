@@ -3,98 +3,92 @@
 - name: Setup macOS
   hosts: localhost
   vars:
-    GPG_NAME: "{{ lookup('env','GPG_NAME') }}"
-    GPG_EMAIL: "{{ lookup('env','GPG_EMAIL') }}"
-    GPG_SIGNING_KEY: "{{ lookup('env','GPG_SIGNING_KEY') }}"
+    gpg_name: "{{ lookup('env','GPG_NAME') }}"
+    gpg_email: "{{ lookup('env','GPG_EMAIL') }}"
+    gpg_signing_key: "{{ lookup('env','GPG_SIGNING_KEY') }}"
+    brewfile_path: "{{ playbook_dir }}/../Brewfile"
+    iterm_integration: "{{ ansible_env.HOME }}/.iterm2_shell_integration.zsh"
   connection: local
   tasks:
     - name: Enable TouchID for Sudo
-      lineinfile:
+      ansible.builtin.lineinfile:
         path: /etc/pam.d/sudo
         line: auth       sufficient     pam_tid.so
         insertafter: "# sudo: "
       become: true
 
     - name: Ensure Homebrew is installed
-      shell: |
-        if ! command -v brew &> /dev/null; then
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-        fi
+      ansible.builtin.shell: >
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       args:
-        executable: /bin/bash
-
+        creates: /opt/homebrew/bin/brew
+        executable: /bin/sh
 
     - name: Set Zsh as default shell
       become: true
-      user:
-        name: "{{ lookup('env', 'USER') }}"
+      ansible.builtin.user:
+        name: "{{ lookup('env','USER') }}"
         shell: /bin/zsh
 
-    - name: Install Oh My Zsh
-      shell: |
-        if [ ! -d "$HOME/.oh-my-zsh" ]; then
-          sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
-        fi
+    - name: Install Oh My Zsh (unattended)
+      ansible.builtin.shell: >
+        sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
       args:
-        executable: /bin/zsh
         creates: "{{ ansible_env.HOME }}/.oh-my-zsh"
+        executable: /bin/zsh
 
     - name: Install packages from Brewfile
-      shell: brew bundle --file={{ playbook_dir }}/../Brewfile
+      ansible.builtin.shell: brew bundle --file="{{ brewfile_path }}"
       args:
         executable: /bin/zsh
 
-    - name: Check if iterm2 shell integration exists
-      stat:
-        path: "~/.iterm2_shell_integration.zsh"
+    - name: Check if iTerm2 zsh integration exists
+      ansible.builtin.stat:
+        path: "{{ iterm_integration }}"
       register: itermzsh
 
-    - name: Install iterm2 zsh integration
-      shell:
-        cmd: curl -L https://iterm2.com/shell_integration/zsh -o ~/.iterm2_shell_integration.zsh
+    - name: Download iTerm2 zsh integration
+      ansible.builtin.get_url:
+        url: https://iterm2.com/shell_integration/zsh
+        dest: "{{ iterm_integration }}"
+        mode: '0644'
       when: not itermzsh.stat.exists
 
     - name: Check if gcloud is installed
-      command: "which gcloud"
+      ansible.builtin.command: which gcloud
       register: gcloud_check
       changed_when: false
       ignore_errors: true
 
-    - name: Install gke-gcloud-auth-plugin if gcloud is available
-      command: "gcloud components install gke-gcloud-auth-plugin --quiet"
+    - name: Check if gke-gcloud-auth-plugin is installed
+      ansible.builtin.shell: >
+        gcloud components list --format='value(id)' | grep -qx 'gke-gcloud-auth-plugin'
       when: gcloud_check.rc == 0
+      register: gke_plugin_present
+      changed_when: false
+      failed_when: false
 
-    - name: Configure Git
-      git_config:
+    - name: Install gke-gcloud-auth-plugin (only if missing)
+      ansible.builtin.command: gcloud components install gke-gcloud-auth-plugin --quiet
+      when:
+        - gcloud_check.rc == 0
+        - gke_plugin_present.rc != 0
+
+    - name: Configure Git (name/email/signing)
+      community.general.git_config:
         name: "{{ item.name }}"
         scope: global
         value: "{{ item.value }}"
       loop:
+        - { name: 'user.name', value: '{{ gpg_name }}' }
+        - { name: 'user.email', value: '{{ gpg_email }}' }
+        - { name: 'user.signingkey', value: '{{ gpg_signing_key }}' }
         - { name: 'commit.gpgsign', value: 'true' }
         - { name: 'gpg.program', value: '/opt/homebrew/bin/gpg' }
-
-    - name: Set git user.name (if provided)
-      git_config:
-        name: user.name
-        scope: global
-        value: "{{ GPG_NAME }}"
-      when: GPG_NAME != ''
-
-    - name: Set git user.email (if provided)
-      git_config:
-        name: user.email
-        scope: global
-        value: "{{ GPG_EMAIL }}"
-      when: GPG_EMAIL != ''
-
-    - name: Set git user.signingkey (if provided)
-      git_config:
-        name: user.signingkey
-        scope: global
-        value: "{{ GPG_SIGNING_KEY }}"
-      when: GPG_SIGNING_KEY != ''
+      when: gpg_email != '' and gpg_signing_key != ''
 
     - name: Clean up Homebrew
-      shell: brew cleanup
+      ansible.builtin.shell: brew cleanup
       args:
         executable: /bin/zsh
+      changed_when: false
