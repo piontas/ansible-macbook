@@ -2,9 +2,10 @@
 # yamllint disable rule:braces
 - name: Setup macOS
   hosts: localhost
-  environment:
-    GPG_EMAIL: "{{ lookup('env', 'GPG_EMAIL') }}"
-    GPG_SIGNING_KEY: "{{ lookup('env', 'GPG_SIGNING_KEY') }}"
+  vars:
+    GPG_NAME: "{{ lookup('env','GPG_NAME') }}"
+    GPG_EMAIL: "{{ lookup('env','GPG_EMAIL') }}"
+    GPG_SIGNING_KEY: "{{ lookup('env','GPG_SIGNING_KEY') }}"
   connection: local
   tasks:
     - name: Enable TouchID for Sudo
@@ -68,11 +69,29 @@
         scope: global
         value: "{{ item.value }}"
       loop:
-        - { name: 'user.name', value: 'Marek Piatek' }
-        - { name: 'user.signingkey', value: '{{ GPG_SIGNING_KEY }}' }
-        - { name: 'user.email', value: '{{ GPG_EMAIL }}' }
         - { name: 'commit.gpgsign', value: 'true' }
         - { name: 'gpg.program', value: '/opt/homebrew/bin/gpg' }
+
+    - name: Set git user.name (if provided)
+      git_config:
+        name: user.name
+        scope: global
+        value: "{{ GPG_NAME }}"
+      when: GPG_NAME != ''
+
+    - name: Set git user.email (if provided)
+      git_config:
+        name: user.email
+        scope: global
+        value: "{{ GPG_EMAIL }}"
+      when: GPG_EMAIL != ''
+
+    - name: Set git user.signingkey (if provided)
+      git_config:
+        name: user.signingkey
+        scope: global
+        value: "{{ GPG_SIGNING_KEY }}"
+      when: GPG_SIGNING_KEY != ''
 
     - name: Clean up Homebrew
       shell: brew cleanup

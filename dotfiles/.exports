@@ -1,1 +1,5 @@
 export AWS_REGION=eu-west-1
+export KIND_RUNNER=podman
+export VAULT_ADDR=https://vault.core.deepinsight.io
+export PODMAN_MEM=24000
+export PODMAN_CPU=16

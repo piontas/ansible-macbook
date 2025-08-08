@@ -132,5 +132,3 @@ gpgconf --launch gpg-agent
 if [ -f "$HOME/.iterm2_shell_integration.zsh" ]; then . "$HOME/.iterm2_shell_integration.zsh"; fi
 
 chuck_cow
-
-
